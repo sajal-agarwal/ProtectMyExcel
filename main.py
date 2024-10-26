@@ -123,7 +123,7 @@ class ExcelProtectionApp:
                 self.show_password.set(data.get("show_password", False))
                 self.protect_formulas.set(data.get("protect_formulas", True))
                 window_size = data.get("window_size", (0, 0))
-                if window_size[0] > 0:  # first launch
+                if window_size[0] > 0:  # previous window_size available
                     self.master.geometry(f"{window_size[0]}x{window_size[1]}")
 
     def on_closing(self):
