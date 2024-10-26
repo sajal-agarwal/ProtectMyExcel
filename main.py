@@ -106,7 +106,8 @@ class ExcelProtectionApp:
             "row_nums": self.row_nums.get(),
             "col_letters": self.col_letters.get(),
             "show_password": self.show_password.get(),
-            "protect_formulas": self.protect_formulas.get()
+            "protect_formulas": self.protect_formulas.get(),
+            "window_size": (self.master.winfo_width(), self.master.winfo_height())
         }
         with open("user_data.json", "w") as f:
             json.dump(data, f)
@@ -121,6 +122,9 @@ class ExcelProtectionApp:
                 self.col_letters.set(data.get("col_letters", ""))
                 self.show_password.set(data.get("show_password", False))
                 self.protect_formulas.set(data.get("protect_formulas", True))
+                window_size = data.get("window_size", (0, 0))
+                if window_size[0] > 0:  # first launch
+                    self.master.geometry(f"{window_size[0]}x{window_size[1]}")
 
     def on_closing(self):
         self.save_data()
