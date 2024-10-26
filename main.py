@@ -3,6 +3,8 @@ from tkinter import filedialog, messagebox
 from openpyxl import load_workbook
 from openpyxl.styles import Protection
 from openpyxl.utils import column_index_from_string
+import json
+import os
 
 
 class ExcelProtectionApp:
@@ -20,9 +22,13 @@ class ExcelProtectionApp:
 
         self.password_entry = None  # Define here to initialize in create_widgets
 
+        self.load_data()  # Load data on startup
+
         self.create_widgets()
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)  # Save data on close
 
     def create_widgets(self):
         outer_frame = tk.Frame(self.master, padx=10, pady=10)
@@ -36,7 +42,8 @@ class ExcelProtectionApp:
         file_frame = tk.Frame(outer_frame)
         file_frame.grid(row=0, column=1, columnspan=3, sticky="ew")
         tk.Entry(file_frame, textvariable=self.file_path, width=50).pack(side=tk.LEFT, expand=True, fill=tk.X)
-        tk.Button(file_frame, text="...", command=self.browse_file, width=2).pack(side=tk.RIGHT, pady=5)
+        tk.Button(file_frame, text="...", command=self.browse_file, width=2, height=1, padx=2).pack(side=tk.RIGHT,
+                                                                                                    padx=1, pady=1)
 
         tk.Label(outer_frame, text="Password:").grid(row=1, column=0, sticky="w")
         password_frame = tk.Frame(outer_frame)
@@ -91,6 +98,33 @@ class ExcelProtectionApp:
             messagebox.showinfo("Success", "File unprotected successfully!")
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def save_data(self):
+        data = {
+            "file_path": self.file_path.get(),
+            "password": self.password.get(),
+            "row_nums": self.row_nums.get(),
+            "col_letters": self.col_letters.get(),
+            "show_password": self.show_password.get(),
+            "protect_formulas": self.protect_formulas.get()
+        }
+        with open("user_data.json", "w") as f:
+            json.dump(data, f)
+
+    def load_data(self):
+        if os.path.exists("user_data.json"):
+            with open("user_data.json", "r") as f:
+                data = json.load(f)
+                self.file_path.set(data.get("file_path", ""))
+                self.password.set(data.get("password", ""))
+                self.row_nums.set(data.get("row_nums", ""))
+                self.col_letters.set(data.get("col_letters", ""))
+                self.show_password.set(data.get("show_password", False))
+                self.protect_formulas.set(data.get("protect_formulas", True))
+
+    def on_closing(self):
+        self.save_data()
+        self.master.destroy()
 
     @staticmethod
     def protect_cells_all_sheets(file_path, row_nums=None, col_letters=None, password=None, protect_formulas=False):
