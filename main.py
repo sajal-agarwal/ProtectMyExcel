@@ -5,6 +5,7 @@ from openpyxl.styles import Protection
 from openpyxl.utils import column_index_from_string
 import json
 import os
+import win32com.client as win32
 
 
 class ExcelProtectionApp:
@@ -157,17 +158,36 @@ class ExcelProtectionApp:
                 sheet.protection.password = password
         workbook.save(file_path)
 
+    # @staticmethod
+    # def unprotect_cells_all_sheets(file_path, password=None):
+    #     workbook = load_workbook(file_path)
+    #     for sheet in workbook:
+    #         for row in sheet.iter_rows():
+    #             for cell in row:
+    #                 cell.protection = Protection(locked=False)
+    #         sheet.protection.sheet = False
+    #         if password:
+    #             sheet.protection.password = ''
+    #     workbook.save(file_path)
+
     @staticmethod
-    def unprotect_cells_all_sheets(file_path, password=None):
-        workbook = load_workbook(file_path)
-        for sheet in workbook:
-            for row in sheet.iter_rows():
-                for cell in row:
-                    cell.protection = Protection(locked=False)
-            sheet.protection.sheet = False
-            if password:
-                sheet.protection.password = ''
-        workbook.save(file_path)
+    def unprotect_cells_all_sheets(file_path, password):
+        # Initialize Excel application
+        excel_app = win32.Dispatch('Excel.Application')
+
+        # Open the workbook
+        wb = excel_app.Workbooks.Open(file_path)
+
+        # Iterate through all sheets
+        for ws in wb.Sheets:
+            ws.Unprotect(Password=password)
+
+        # Save the workbook
+        wb.Save()
+        wb.Close()
+
+        # Quit the Excel application
+        excel_app.Quit()
 
 
 if __name__ == "__main__":
